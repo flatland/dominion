@@ -1,4 +1,5 @@
-import Data.Map
+import qualified Data.Map as Map
+import Data.Map (Map)
 import Data.Monoid
 
 data Card = Card {cost :: Cost,
@@ -103,7 +104,34 @@ basicTreasure name cost value = Card {cost = cost,
                                       cleanupRule = Nothing,
                                       action = Nothing}
 
-copper = basicTreasure "Copper" (Cost 0 0) (Cost 1 0)
+vpCard :: String -> Cost -> (Player -> Integer) -> Card
+vpCard name cost score = Card {cost = cost,
+                               overpayRule = Nothing,
+                               buyable = const True,
+                               types = [Victory],
+                               name = name,
+                               description = Nothing,
+                               vpValue = score,
+                               treasureEffect = Nothing,
+                               reactions = [],
+                               cleanupRule = Nothing,
+                               action = Nothing}
+
+
+[copper, silver, gold, platinum] = map treasure [("Copper", 0, 1),
+                                                 ("Silver", 3, 2),
+                                                 ("Gold", 6, 3),
+                                                 ("Platinum", 9, 5)]
+  where treasure (name, cost, value) = basicTreasure name (Cost cost 0) (Cost value 0)
+
+potion = basicTreasure "Potion" (Cost 4 0) (Cost 0 1)
+
+[estate, duchy, province, colony] = map basicVPCard [("Estate", 2, 1),
+                                                     ("Duchy", 5, 3),
+                                                     ("Province", 8, 6),
+                                                     ("Colony", 11, 10)]
+  where basicVPCard (name, cost, score) = vpCard name cost (const score)
+
 
 startOfTurn = TurnState {resources = (Cost 0 0), buys = 1, actions = 1,
                          phase = ActionPhase, cardsPlayed = []}
