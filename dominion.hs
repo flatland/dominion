@@ -1,6 +1,7 @@
 import qualified Data.Map as Map
 import Data.Map (Map)
 import Data.Monoid
+import qualified Data.Poset as Poset
 
 data Card = Card {cost :: Cost,
                   overpayRule :: Maybe (Cost -> Game -> Game),
@@ -29,6 +30,16 @@ data Cost = Cost Integer Integer -- coins, potions
 instance Monoid Cost where
   mempty = Cost 0 0
   mappend (Cost c1 p1) (Cost c2 p2) = Cost (c1 + c2) (p1 + p2)
+
+instance Poset.Poset Cost where
+  compare (Cost c1 p1) (Cost c2 p2)
+    | c1 > c2 && p1 < p2 = Poset.NC
+    | c1 < c2 && p1 > p2 = Poset.NC
+    | c1 > c2 = Poset.GT
+    | c1 < c2 = Poset.LT
+    | p1 > p2 = Poset.GT
+    | p1 < p2 = Poset.LT
+    | otherwise = Poset.EQ
 
 data CardType = Action | Reaction | Duration | Prize
               | Victory | Curse | Treasure | Ruins | Shelter
